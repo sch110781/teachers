@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#14532d">
+    <title>نظام تحضير الطابور الصباحي</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --school-green: #14532d;
+            --school-green-dark: #0d3b20;
+            --school-green-soft: #edf7ef;
+            --school-gold: #c6922d;
+            --school-gold-soft: #fff8e8;
+            --ink: #183329;
+        }
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: "Cairo", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 0% 0%, rgba(198, 146, 45, 0.10), transparent 28rem),
+                linear-gradient(180deg, #f8fbf8 0%, #f1f6f2 100%);
+        }
+        .page-shell { max-width: 1180px; }
+        .school-header {
+            background: linear-gradient(135deg, var(--school-green-dark), var(--school-green));
+            box-shadow: 0 18px 35px rgba(13, 59, 32, .16);
+        }
+        .gold-line {
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--school-gold), transparent);
+        }
+        .ornament {
+            position: relative;
+            width: 52px;
+            height: 52px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(255,255,255,.35);
+            border-radius: 16px;
+            color: #f5d48b;
+            background: rgba(255,255,255,.08);
+        }
+        .ornament::before,
+        .ornament::after {
+            content: "";
+            position: absolute;
+            inset: 7px;
+            border: 1px solid rgba(245, 212, 139, .34);
+            border-radius: 11px;
+            transform: rotate(45deg);
+        }
+        .card {
+            background: rgba(255,255,255,.94);
+            border: 1px solid #e1ece3;
+            border-radius: 22px;
+            box-shadow: 0 8px 26px rgba(21, 67, 39, .06);
+        }
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            color: var(--school-green-dark);
+        }
+        .section-title::before {
+            content: "";
+            width: 5px;
+            height: 27px;
+            border-radius: 99px;
+            background: var(--school-gold);
+        }
+        .field-label {
+            display: block;
+            margin-bottom: .45rem;
+            color: #426153;
+            font-size: .82rem;
+            font-weight: 700;
+        }
+        .teacher-card {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            min-height: 58px;
+            padding: .75rem .9rem;
+            border: 1px solid #e2ece4;
+            border-radius: 15px;
+            background: #fbfdfb;
+            cursor: pointer;
+            transition: .2s ease;
+        }
+        .teacher-card:hover {
+            border-color: #a7c6ad;
+            background: var(--school-green-soft);
+            transform: translateY(-1px);
+        }
+        .teacher-card:has(input:checked) {
+            border-color: #81ad8c;
+            background: #eef8f0;
+            box-shadow: inset 0 0 0 1px rgba(20,83,45,.06);
+        }
+        .teacher-card input {
+            accent-color: var(--school-green);
+            width: 19px;
+            height: 19px;
+            flex: none;
+        }
+        .teacher-card .check-mark {
+            opacity: 0;
+            color: var(--school-green);
+            transition: .2s ease;
+        }
+        .teacher-card:has(input:checked) .check-mark { opacity: 1; }
+        .action-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .55rem;
+            border-radius: 13px;
+            font-weight: 700;
+            transition: .2s ease;
+            cursor: pointer;
+        }
+        .action-button:hover { transform: translateY(-1px); }
+        .btn-primary {
+            color: white;
+            background: linear-gradient(135deg, #196b3b, var(--school-green));
+            box-shadow: 0 8px 16px rgba(20,83,45,.17);
+        }
+        .btn-primary:hover { background: linear-gradient(135deg, #21834a, #104624); }
+        .btn-gold {
+            color: #66460d;
+            background: var(--school-gold-soft);
+            border: 1px solid #f1dca7;
+        }
+        .btn-gold:hover { background: #fff0c8; }
+        .btn-danger {
+            color: #a33a32;
+            background: #fff6f4;
+            border: 1px solid #f5d2cd;
+        }
+        .btn-danger:hover { background: #ffebe7; }
+        .date-chip {
+            background: rgba(255,255,255,.11);
+            border: 1px solid rgba(255,255,255,.2);
+            color: #fff;
+        }
+        .stat-card {
+            border-radius: 18px;
+            border: 1px solid #e0ebe2;
+            background: #fff;
+        }
+        .stat-number { color: var(--school-green-dark); }
+        .report-table th {
+            background: #f0f7f1;
+            color: var(--school-green-dark);
+            font-weight: 800;
+        }
+        .report-table tr { border-bottom: 1px solid #edf2ee; }
+        .report-table tr:last-child { border-bottom: 0; }
+        .report-table tbody tr:hover { background: #fbfdfb; }
+        .empty-state {
+            border: 1px dashed #b9cdbc;
+            background: #fbfefb;
+        }
+        .hidden-by-search { display: none !important; }
+        @media (max-width: 640px) {
+            .page-shell { padding-left: .85rem; padding-right: .85rem; }
+            .card { border-radius: 18px; }
+            .school-header { border-radius: 20px !important; }
+        }
+        @page {
+            size: A4 portrait;
+            margin: 8mm;
+        }
+        @media print {
+            html, body {
+                width: 210mm;
+                min-height: 297mm;
+                background: white !important;
+            }
+            body {
+                margin: 0 !important;
+                padding: 0 !important;
+                color: #183329 !important;
+                font-size: 9px !important;
+            }
+            .no-print, .school-header .no-print { display: none !important; }
+            .page-shell {
+                width: 194mm;
+                max-width: none;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            /* طباعة التقرير فقط لمنع ظهور صفحة بيضاء قبل التقارير */
+            .page-shell > *:not(#report-section) {
+                display: none !important;
+            }
+            .card {
+                box-shadow: none !important;
+                border-color: #c9d8cc !important;
+                border-radius: 4mm !important;
+                break-inside: avoid;
+            }
+            #report-section {
+                display: block !important;
+                margin: 0 !important;
+            }
+            #report-section > .print-page-1,
+            #report-section > .print-page-2 {
+                width: 194mm;
+                height: 281mm;
+                min-height: 281mm;
+                max-height: 281mm;
+                margin: 0 !important;
+                padding: 7mm !important;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                overflow: hidden;
+                page-break-after: always;
+                break-after: page;
+            }
+            #report-section > .print-page-2 {
+                page-break-before: always;
+                break-before: page;
+            }
+            #report-section > .print-page-1:last-child,
+            #report-section > .print-page-2:last-child {
+                page-break-after: auto;
+                break-after: auto;
+            }
+            #report-section .mb-5 { margin-bottom: 3mm !important; }
+            #report-section .pb-4 { padding-bottom: 2.5mm !important; }
+            #report-section .mt-1 { margin-top: 1mm !important; }
+            #report-section .mt-5 { margin-top: 3mm !important; }
+            #report-section .pt-3 { padding-top: 2mm !important; }
+            #report-section .gap-3 { gap: 2mm !important; }
+            #report-section .p-3 { padding: 1.8mm !important; }
+            #report-section .px-3 { padding-left: 2mm !important; padding-right: 2mm !important; }
+            #report-section .py-1\.5 { padding-top: 1mm !important; padding-bottom: 1mm !important; }
+            #report-section .text-lg { font-size: 14px !important; line-height: 1.35 !important; }
+            #report-section .text-xl { font-size: 16px !important; }
+            #report-summary {
+                grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+                gap: 2mm !important;
+                margin-bottom: 3mm !important;
+            }
+            #report-summary .stat-card {
+                padding: 2mm !important;
+                border-radius: 2.5mm !important;
+            }
+            #report-summary .stat-number,
+            #report-summary .text-xl {
+                font-size: 15px !important;
+                line-height: 1.2 !important;
+            }
+            #report-grids-container,
+            #stats-grids-container {
+                grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+                gap: 2mm !important;
+            }
+            #report-section table {
+                font-size: 8px !important;
+                line-height: 1.3 !important;
+            }
+            #report-section table th,
+            #report-section table td {
+                padding: 1.15mm 1.2mm !important;
+                white-space: nowrap;
+            }
+            #report-section table th:nth-child(1),
+            #report-section table td:nth-child(1) { width: 8mm; }
+            #report-section table th:nth-child(3),
+            #report-section table td:nth-child(3),
+            #report-section table th:nth-child(4),
+            #report-section table td:nth-child(4) { width: 15mm; }
+            #report-section footer {
+                font-size: 8px !important;
+                line-height: 1.2 !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <main class="page-shell mx-auto px-4 py-5 md:px-8 md:py-8">
+        <!-- الهوية الرئيسية -->
+        <header class="school-header no-print overflow-hidden rounded-[26px] text-white">
+            <div class="gold-line"></div>
+            <div class="flex flex-col gap-6 px-5 py-6 sm:px-8 md:flex-row md:items-center md:justify-between md:py-7">
+                <div class="flex items-center gap-4">
+                    <div class="ornament shrink-0" aria-hidden="true">
+                        <svg class="relative z-10 h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M4 20h16M6 17h12M7 4h10v13H7zM9 7h6M9 10h6M9 13h6"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="mb-1 text-xs font-semibold tracking-[.18em] text-amber-200"> شؤون المعلمين</p>
+                        <h1 class="text-xl font-extrabold sm:text-2xl">نظام تحضير الطابور الصباحي</h1>
+                        <p class="mt-1 text-xs text-green-100/80 sm:text-sm">تسجيل الحضور ومتابعة السجل اليومي بسهولة</p>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between gap-3 sm:justify-end">
+                    <div id="current-date-time" class="date-chip rounded-xl px-3 py-2 text-center text-xs font-semibold leading-6 sm:px-4">
+                        جاري تحميل التاريخ...
+                    </div>
+                    <button onclick="deleteAllData()" class="action-button btn-danger h-11 w-11" title="حذف جميع السجلات" aria-label="حذف جميع السجلات">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m6 7 .8 12.1A2 2 0 0 0 8.8 21h6.4a2 2 0 0 0 2-1.9L18 7M4 7h16M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3m-5 4v6m4-6v6"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+        <div class="mt-5 grid gap-5 xl:grid-cols-[1.35fr_.65fr]">
+            <!-- بطاقة الإدخال -->
+            <section class="card no-print p-5 md:p-7">
+                <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <h2 class="section-title text-lg font-extrabold">تسجيل حضور المعلمين</h2>
+                        <p class="mt-2 text-sm text-slate-500">حدد أسماء المعلمين الذين حضروا الطابور الصباحي اليوم.</p>
+                    </div>
+                    <div id="selected-count" class="rounded-full bg-[#edf7ef] px-3 py-1.5 text-xs font-bold text-[#14532d]">0 حاضر اليوم</div>
+                </div>
+                <div class="mb-5 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
+                    <div>
+                        <label class="field-label" for="teacher-search">بحث في قائمة المعلمين</label>
+                        <div class="relative">
+                            <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>
+                            </svg>
+                            <input id="teacher-search" type="search" placeholder="اكتب اسم المعلم..." class="w-full rounded-xl border border-[#dce9de] bg-[#fbfdfb] py-3 pr-10 pl-3 text-sm outline-none transition focus:border-[#8db398] focus:ring-4 focus:ring-[#edf7ef]">
+                        </div>
+                    </div>
+                    <button onclick="selectAllTeachers()" class="action-button btn-gold mt-auto px-4 py-3 text-sm">تحديد الكل</button>
+                    <button onclick="clearTeachers()" class="action-button mt-auto border border-[#dce9de] bg-white px-4 py-3 text-sm text-[#426153] hover:bg-[#f5faf6]">إلغاء التحديد</button>
+                </div>
+                <div id="teachers-checkboxes" class="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3"></div>
+                <div class="mt-6 flex flex-col gap-3 border-t border-[#edf2ee] pt-5 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="text-xs leading-6 text-slate-500">
+                        <span class="font-bold text-[#426153]">ملاحظة:</span>
+                        يمكنك تعديل التحضير وإعادة الحفظ في أي وقت خلال اليوم.
+                    </p>
+                    <button onclick="generateReport()" class="action-button btn-primary px-6 py-3.5 text-sm">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 12.5 9.5 17 19 7.5"/>
+                        </svg>
+                        حفظ التحضير وإصدار التقرير
+                    </button>
+                </div>
+            </section>
+            <!-- بطاقة الأيام السابقة -->
+            <aside class="card no-print p-5 md:p-7">
+                <div class="mb-5">
+                    <h2 class="section-title text-lg font-extrabold">السجل السابق</h2>
+                    <p class="mt-2 text-sm leading-6 text-slate-500">راجع الأيام المسجلة واحذف يومًا محددًا عند الحاجة.</p>
+                </div>
+                <div class="rounded-2xl bg-[#f8fbf8] p-3">
+                    <div class="mb-3 flex items-center justify-between">
+                        <span class="text-xs font-bold text-[#426153]">الأيام المسجلة</span>
+                        <span class="rounded-full bg-white px-2.5 py-1 text-[11px] font-bold text-slate-400">حذف فردي</span>
+                    </div>
+                    <div id="days-list-container" class="flex max-h-72 min-h-28 flex-wrap content-start gap-2 overflow-y-auto">
+                        <span class="text-xs text-slate-400">جاري تحميل السجلات...</span>
+                    </div>
+                </div>
+                <div class="mt-5 rounded-2xl border border-[#f1dca7] bg-[#fffaf0] p-4 text-xs leading-6 text-[#765719]">
+                    <div class="mb-1 flex items-center gap-2 font-extrabold">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="9"/><path d="M12 10v6m0-9h.01"/>
+                        </svg>
+                        تنبيه
+                    </div>
+                    حذف جميع السجلات نهائي ولا يمكن التراجع عنه.
+                </div>
+            </aside>
+        </div>
+        <!-- التقارير -->
+        <section id="report-section" class="mt-5 hidden space-y-5">
+            <div class="no-print flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 class="section-title text-xl font-extrabold">التقارير والإحصائيات</h2>
+                    <p class="mt-2 text-sm text-slate-500">ملخص الحضور اليومي والسجل التراكمي للمعلمين.</p>
+                </div>
+                <button onclick="window.print()" class="action-button btn-gold px-5 py-3 text-sm">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/>
+                    </svg>
+                    طباعة التقارير
+                </button>
+            </div>
+            <div class="card print-page-1 p-5 md:p-7">
+                <div>
+                    <div class="mb-5 flex flex-col gap-2 border-b border-[#e7efe8] pb-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h3 class="text-lg font-extrabold text-[#14532d]">إحصائية حضور الطابور اليوم</h3>
+                            <p id="report-date-display" class="mt-1 text-xs text-slate-500"></p>
+                        </div>
+                        <span class="w-fit rounded-full bg-[#edf7ef] px-3 py-1.5 text-[11px] font-bold text-[#14532d]">التقرير اليومي</span>
+                    </div>
+                    <div id="report-summary" class="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4"></div>
+                    <div id="report-grids-container" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"></div>
+                </div>
+                <footer class="mt-5 border-t border-[#edf2ee] pt-3 text-center text-[11px] text-slate-400">
+                    نظام تحضير الطابور الصباحي — شؤون المعلمين
+                </footer>
+            </div>
+            <div class="card print-page-2 p-5 md:p-7">
+                <div>
+                    <div class="mb-5 flex flex-col gap-2 border-b border-[#e7efe8] pb-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <h3 class="text-lg font-extrabold text-[#14532d]">الإحصائية التراكمية لحضور الطابور الصباحي</h3>
+                            <p class="mt-1 text-xs text-slate-500">إجمالي مرات الحضور والغياب في جميع الأيام المسجلة.</p>
+                        </div>
+                        <span class="w-fit rounded-full bg-[#fff8e8] px-3 py-1.5 text-[11px] font-bold text-[#765719]">إحصائيات شاملة</span>
+                    </div>
+                    <div id="stats-grids-container" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"></div>
+                </div>
+                <footer class="mt-5 border-t border-[#edf2ee] pt-3 text-center text-[11px] text-slate-400">
+                    نظام تحضير الطابور الصباحي — إدارة شؤون المعلمين
+                </footer>
+            </div>
+        </section>
+        <footer class="py-7 text-center text-xs text-slate-400 no-print">
+            <span class="text-[#c6922d]">◆</span>
+            نظام إلكتروني لإدارة تحضير الطابور الصباحي
+            <span class="text-[#c6922d]">◆</span>
+        </footer>
+    </main>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import {
+            getFirestore, collection, doc, getDoc, setDoc, deleteDoc, getDocs
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        const firebaseConfig = {
+            apiKey: "AIzaSyAAsAPzYyN7MaNcIazAdiGZZ_OgvaGxpUw",
+            authDomain: "techers-15c47.firebaseapp.com",
+            projectId: "techers-15c47",
+            storageBucket: "techers-15c47.firebasestorage.app",
+            messagingSenderId: "428712867371",
+            appId: "1:428712867371:web:8560dcb04f9d400df01c6e"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const teachers = [
+            "أحمد هزازي", "أحمد الخميس", "جبهان الشمري", "حسن العيدروس",
+            "زيد الهيلي", "سامر الفهمي", "سعود الخماش", "سلطان المالكي",
+            "سلمان الحربي", "صالح القرني", "طارق الحارثي", "عبدالاله الغامدي",
+            "عبدالعزيز السبيعي", "عبدالله الدوسري", "عبدالله الحارثي", "عثمان الفارس",
+            "علي الأسمري", "فهد الزومان", "فيصل الشهري", "ماجد المطيري",
+            "مبارك الوقداني", "محمد بن داود", "محمد الفراج", "محمد النصار",
+            "محمد العمري", "محمد السبيعي", "محمد الغامدي", "مشبب الأحمري",
+            "موسى البعداني", "وليد السلمي", "وليد الأمير"
+        ];
+        function getTodayKey() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+        }
+        function getDateLabels() {
+            const now = new Date();
+            return {
+                long: now.toLocaleDateString("ar-SA", {
+                    weekday: "long", year: "numeric", month: "long", day: "numeric"
+                }),
+                hijri: now.toLocaleDateString("ar-SA-u-ca-islamic", {
+                    year: "numeric", month: "long", day: "numeric"
+                }),
+                gregorian: now.toLocaleDateString("en-GB", {
+                    year: "numeric", month: "2-digit", day: "2-digit"
+                })
+            };
+        }
+        function splitIntoFour(items) {
+            const chunkSize = Math.ceil(items.length / 4);
+            return Array.from({ length: 4 }, (_, index) =>
+                items.slice(index * chunkSize, (index + 1) * chunkSize)
+            );
+        }
+        function updateSelectedCount() {
+            const selected = document.querySelectorAll('input[name="teacher"]:checked').length;
+            document.getElementById("selected-count").textContent = `${selected} حاضر اليوم`;
+        }
+        function renderTeacherList() {
+            const container = document.getElementById("teachers-checkboxes");
+            container.innerHTML = teachers.map((teacher) => `
+                <label class="teacher-card" data-teacher="${teacher}">
+                    <input type="checkbox" name="teacher" value="${teacher}">
+                    <span class="min-w-0 flex-1 truncate text-sm font-semibold text-[#294e3a]">${teacher}</span>
+                    <svg class="check-mark h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4.5 4.5L19 7"/>
+                    </svg>
+                </label>
+            `).join("");
+            container.addEventListener("change", updateSelectedCount);
+        }
+        function applyTeacherSearch() {
+            const term = document.getElementById("teacher-search").value.trim().toLowerCase();
+            document.querySelectorAll(".teacher-card").forEach((card) => {
+                card.classList.toggle("hidden-by-search", !card.dataset.teacher.toLowerCase().includes(term));
+            });
+        }
+        window.selectAllTeachers = function() {
+            document.querySelectorAll(".teacher-card:not(.hidden-by-search) input").forEach((input) => input.checked = true);
+            updateSelectedCount();
+        };
+        window.clearTeachers = function() {
+            document.querySelectorAll('input[name="teacher"]').forEach((input) => input.checked = false);
+            updateSelectedCount();
+        };
+        async function loadTodaySelections() {
+            const snapshot = await getDoc(doc(db, "daily_reports", getTodayKey()));
+            if (!snapshot.exists()) return;
+            const presentTeachers = snapshot.data().presentTeachers || [];
+            document.querySelectorAll('input[name="teacher"]').forEach((input) => {
+                input.checked = presentTeachers.includes(input.value);
+            });
+            updateSelectedCount();
+        }
+        function renderSummary(presentTeachers) {
+            const absentCount = teachers.length - presentTeachers.length;
+            document.getElementById("report-summary").innerHTML = `
+                <div class="stat-card p-3 text-center">
+                    <div class="text-[11px] font-bold text-slate-400">إجمالي المعلمين</div>
+                    <div class="stat-number mt-1 text-xl font-extrabold">${teachers.length}</div>
+                </div>
+                <div class="stat-card border-[#cde3d1] bg-[#f7fcf8] p-3 text-center">
+                    <div class="text-[11px] font-bold text-[#4b8060]">حاضر اليوم</div>
+                    <div class="mt-1 text-xl font-extrabold text-[#19703b]">${presentTeachers.length}</div>
+                </div>
+                <div class="stat-card border-[#f2d6d0] bg-[#fffafa] p-3 text-center">
+                    <div class="text-[11px] font-bold text-[#a55e55]">لم يحضر</div>
+                    <div class="mt-1 text-xl font-extrabold text-[#bd4b3e]">${absentCount}</div>
+                </div>
+                <div class="stat-card border-[#f1dca7] bg-[#fffdf7] p-3 text-center">
+                    <div class="text-[11px] font-bold text-[#99782e]">نسبة الحضور</div>
+                    <div class="mt-1 text-xl font-extrabold text-[#9b711e]">${Math.round((presentTeachers.length / teachers.length) * 100)}%</div>
+                </div>
+            `;
+        }
+        function renderReportTables(presentTeachers) {
+            renderSummary(presentTeachers);
+            document.getElementById("report-grids-container").innerHTML = splitIntoFour(teachers).map((chunk, groupIndex) => `
+                <div class="overflow-hidden rounded-xl border border-[#e0ebe2]">
+                    <table class="report-table w-full border-collapse text-right text-xs">
+                        <thead><tr>
+                            <th class="p-2 text-center">#</th>
+                            <th class="p-2">المعلم</th>
+                            <th class="p-2 text-center">الحالة</th>
+                        </tr></thead>
+                        <tbody>
+                            ${chunk.map((teacher, index) => {
+                                const globalIndex = groupIndex * Math.ceil(teachers.length / 4) + index + 1;
+                                const present = presentTeachers.includes(teacher);
+                                return `<tr>
+                                    <td class="p-2 text-center text-slate-400">${globalIndex}</td>
+                                    <td class="p-2 font-semibold text-[#294e3a]">${teacher}</td>
+                                    <td class="p-2 text-center font-extrabold ${present ? "text-[#19703b]" : "text-[#bd4b3e]"}">${present ? "حاضر" : "لم يحضر"}</td>
+                                </tr>`;
+                            }).join("")}
+                        </tbody>
+                    </table>
+                </div>
+            `).join("");
+        }
+        window.generateReport = async function() {
+            const presentTeachers = Array.from(document.querySelectorAll('input[name="teacher"]:checked')).map((input) => input.value);
+            try {
+                await setDoc(doc(db, "daily_reports", getTodayKey()), {
+                    date: getTodayKey(),
+                    presentTeachers
+                });
+                renderReportTables(presentTeachers);
+                await calculateAndDisplayStats();
+                await loadDaysList();
+                document.getElementById("report-section").classList.remove("hidden");
+                document.getElementById("report-section").scrollIntoView({ behavior: "smooth", block: "start" });
+            } catch (error) {
+                console.error("خطأ أثناء الحفظ:", error);
+                alert("حدث خطأ أثناء الاتصال بقاعدة البيانات.");
+            }
+        };
+        async function loadDaysList() {
+            const container = document.getElementById("days-list-container");
+            try {
+                const snapshot = await getDocs(collection(db, "daily_reports"));
+                container.innerHTML = "";
+                if (snapshot.empty) {
+                    container.innerHTML = '<div class="empty-state w-full rounded-xl p-4 text-center text-xs text-slate-400">لا توجد أيام مسجلة حتى الآن.</div>';
+                    return;
+                }
+                const days = snapshot.docs.map((item) => item.id).sort().reverse();
+                days.forEach((dayKey) => {
+                    container.innerHTML += `
+                        <div class="flex items-center gap-1.5 rounded-lg border border-[#dce9de] bg-white px-2.5 py-1.5 text-xs shadow-sm">
+                            <span class="font-bold text-[#426153]">${dayKey}</span>
+                            <button onclick="deleteSingleDay('${dayKey}')" class="text-[#bd4b3e] transition hover:text-[#8c2e27]" title="حذف هذا اليوم" aria-label="حذف ${dayKey}">
+                                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" d="M6 6l12 12M18 6 6 18"/></svg>
+                            </button>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.error("خطأ في جلب قائمة الأيام:", error);
+                container.innerHTML = '<div class="w-full rounded-xl bg-[#fff6f4] p-4 text-center text-xs text-[#a33a32]">تعذر تحميل السجل حاليًا.</div>';
+            }
+        }
+        window.deleteSingleDay = async function(dayKey) {
+            if (!confirm(`هل أنت متأكد من حذف سجل يوم (${dayKey})؟ سيتم تحديث الإحصائيات.`)) return;
+            try {
+                await deleteDoc(doc(db, "daily_reports", dayKey));
+                await calculateAndDisplayStats();
+                await loadDaysList();
+                if (dayKey === getTodayKey()) {
+                    clearTeachers();
+                    document.getElementById("report-section").classList.add("hidden");
+                }
+                alert("تم حذف السجل بنجاح.");
+            } catch (error) {
+                console.error("خطأ أثناء الحذف:", error);
+                alert("حدث خطأ أثناء محاولة الحذف.");
+            }
+        };
+        window.deleteAllData = async function() {
+            if (!confirm("تحذير: سيتم حذف جميع السجلات نهائيًا، ولا يمكن التراجع عن هذا الإجراء. هل تريد المتابعة؟")) return;
+            try {
+                const snapshot = await getDocs(collection(db, "daily_reports"));
+                await Promise.all(snapshot.docs.map((item) => deleteDoc(doc(db, "daily_reports", item.id))));
+                clearTeachers();
+                document.getElementById("report-section").classList.add("hidden");
+                await calculateAndDisplayStats();
+                await loadDaysList();
+                alert("تم حذف جميع السجلات بنجاح.");
+            } catch (error) {
+                console.error("خطأ أثناء الحذف الشامل:", error);
+                alert("حدث خطأ أثناء حذف البيانات.");
+            }
+        };
+        async function calculateAndDisplayStats() {
+            try {
+                const snapshot = await getDocs(collection(db, "daily_reports"));
+                const stats = Object.fromEntries(teachers.map((teacher) => [teacher, { present: 0, absent: 0 }]));
+                snapshot.forEach((item) => {
+                    const presentList = item.data().presentTeachers || [];
+                    teachers.forEach((teacher) => {
+                        if (presentList.includes(teacher)) stats[teacher].present += 1;
+                        else stats[teacher].absent += 1;
+                    });
+                });
+                document.getElementById("stats-grids-container").innerHTML = splitIntoFour(teachers).map((chunk, groupIndex) => `
+                    <div class="overflow-hidden rounded-xl border border-[#e0ebe2]">
+                        <table class="report-table w-full border-collapse text-right text-xs">
+                            <thead><tr>
+                                <th class="p-2 text-center">#</th>
+                                <th class="p-2">المعلم</th>
+                                <th class="p-2 text-center">حضر</th>
+                                <th class="p-2 text-center">غاب</th>
+                            </tr></thead>
+                            <tbody>
+                                ${chunk.map((teacher, index) => {
+                                    const globalIndex = groupIndex * Math.ceil(teachers.length / 4) + index + 1;
+                                    return `<tr>
+                                        <td class="p-2 text-center text-slate-400">${globalIndex}</td>
+                                        <td class="p-2 font-semibold text-[#294e3a]">${teacher}</td>
+                                        <td class="p-2 text-center font-extrabold text-[#19703b]">${stats[teacher].present}</td>
+                                        <td class="p-2 text-center font-extrabold text-[#bd4b3e]">${stats[teacher].absent}</td>
+                                    </tr>`;
+                                }).join("")}
+                            </tbody>
+                        </table>
+                    </div>
+                `).join("");
+                const todaySnapshot = await getDoc(doc(db, "daily_reports", getTodayKey()));
+                if (todaySnapshot.exists()) {
+                    renderReportTables(todaySnapshot.data().presentTeachers || []);
+                }
+            } catch (error) {
+                console.error("خطأ في جلب الإحصائيات:", error);
+            }
+        }
+        async function init() {
+            const labels = getDateLabels();
+            document.getElementById("current-date-time").innerHTML = `${labels.long}<br><span class="font-normal text-green-100/75">${labels.hijri}</span>`;
+            document.getElementById("report-date-display").textContent = `تاريخ التقرير: ${labels.long} — ${labels.gregorian}`;
+            renderTeacherList();
+            document.getElementById("teacher-search").addEventListener("input", applyTeacherSearch);
+            await loadTodaySelections();
+            await calculateAndDisplayStats();
+            await loadDaysList();
+            const todaySnapshot = await getDoc(doc(db, "daily_reports", getTodayKey()));
+            if (todaySnapshot.exists()) {
+                renderReportTables(todaySnapshot.data().presentTeachers || []);
+                document.getElementById("report-section").classList.remove("hidden");
+            }
+        }
+        window.addEventListener("load", init);
+    </script>
+</body>
+</html>
